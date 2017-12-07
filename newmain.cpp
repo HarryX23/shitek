@@ -28,7 +28,7 @@ int main() {
     ofstream write_stream;
     
 
-    cout << "Vítá vás program Rezervace Privat" << endl;
+    cout << "Vítá vás program Rezervace Pokojů" << endl;
 
 	cout << "------SEZNAM POKOJŮ--------" <<  endl;
 
@@ -36,13 +36,10 @@ int main() {
     ifstream read_stream("pokoje.csv");
 
     if(read_stream.fail()) {
-        cout << "Soubor nelze otevřít" <<endl;
+        cout << "Soubor pokoje.csv nelze otevřít" <<endl;
         exit(1);
     }
-    if(write_stream.fail()) {
-        cout << "Soubor nelze otevřít" <<endl;
-        exit(1);
-}
+    
 
     cout << right << setw(5) << setfill(separator) << "ID" << right << setw(6) << setfill(separator) << "Patro" << right << setw(15) << setfill(separator)  << "Číslo pokoje" <<  right << setw(15) << setfill(separator) << "Kapacita " << right << setw(15) << setfill(separator) << "Cena" << endl;
     while (getline(read_stream, radek)) {
@@ -121,17 +118,18 @@ read_stream.close();
                                         if(cena <= hledej_cena and kapacita >= hledej_kapacita) {
                             //nactení rezervací
                                              ifstream rezervace_dostupnost ("rezervace_data.csv", ios::in);
-                                             while(getline(rezervace_dostupnost, line)) {
-                                                 int mm, dd, rrrr;
+                                             getline(rezervace_dostupnost, line);
+                                                 int por_id, mm, dd, rrrr;
                                                  istringstream iss(line);
                                                  if(!(iss >> id >> dd >> mm >> rrrr)) {break;}
-                                                 if(dd == datum_d and mm == datum_m and rrrr == datum_r) {   
-                                                     cout << left << id << "tento pokoj obsazen" << endl;
+                                                 if(id == por_id and dd == datum_d and mm == datum_m and rrrr == datum_r) {   
+                                                     cout << left << id << " " << "tento pokoj obsazen" << endl;
+                                                     iss.clear();
                                                  }
                                                  else
                                                  cout << right << setw(5) << setfill(separator) << id << right << setw(6) << setfill(separator) << patro << right << setw(10) << setfill(separator)  << cislo_pokoje <<  right << setw(10) << setfill(separator) << kapacita << right << setw(10) << setfill(separator) << cena << "K�" << endl;
                                                  iss.clear();
-                                             } 
+                                             
                                         rezervace_dostupnost.close(); }
                                         }
                          
@@ -159,7 +157,8 @@ read_stream.close();
          int datum_r;
          string line;
          int id, patro, cislo_pokoje, cena, kapacita;
-
+         
+         rezerv:
 			 cout << "-------REZERVACE-------" <<  endl;
 
 			 cout << "Zadejte ID m�stnosti: ";
@@ -176,6 +175,13 @@ read_stream.close();
                          }
                          while(getline(rezervace_dostupnost, line)){
                              istringstream iss3(line);
+                             int id, dd, mm, rrrr;
+                             if(!(iss3 >> id >> dd >> mm >> rrrr)){break;}
+                             if(id == rez_id and dd == datum_d and mm == datum_m and rrrr == datum_r){
+                                 cout << "tento pokoje je na toto datum obsazen zvolte jiné datum" << endl;
+                                 iss3.clear();
+                                 goto rezerv;
+                             }
                          }
                          
                            
@@ -201,7 +207,7 @@ read_stream.close();
 			 rezervace << "<p>" << "Vaše rezervace " << "</p>" << endl;
 			 rezervace << "<p>" << "ID místnosti: " << id << endl;
 			 rezervace << "<p>" << "Patro: "<< patro << "</p>" << endl;
-			 rezervace << "<p>" << "Konečna cena: " << cena << "K�" << "</p>" << endl;                    
+			 rezervace << "<p>" << "Konečna cena: " << cena << "Kč" << "</p>" << endl;                    
 			 rezervace << "<p>" << "Datum: " << datum_d << "/" << datum_m << "/" << datum_r << "</p>" << endl;
                       
                            
