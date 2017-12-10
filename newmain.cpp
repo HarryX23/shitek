@@ -26,6 +26,7 @@ bool overeni_kapacita(int); // rozmezí 1 až 100
 bool overeni_cena(int); //rozmezi 1 až 30 mil.
 bool overeni_id(int); //  rozmezí 1 až 100
 int chyb_hlaska(string); // nový vstup 
+bool overeni_dostupnost();
 
 
 int main() {
@@ -79,7 +80,7 @@ read_stream.close();
                         int datum_m;
                         int datum_r;
                         string radek;
-                        string line;
+                        string carka;
 
                         // 		VYHLEDÁVANÍ
 
@@ -115,63 +116,60 @@ read_stream.close();
                          }
                          
                       
-                        //tady začíná problém
+                        
 
      // otevreni pro ctení
-                         ifstream pokoje_hled("pokoje.csv");
+                         ifstream pokoje_hled("pokoje.csv", ios::in);
                          if(pokoje_hled.fail()) {
                              cout << "soubor 'pokoje.csv' nelze otevrít" << endl;
                              exit(1);
                          }
-
-                         cout << right << setw(5) << setfill(separator) << "ID" << right << setw(6) << setfill(separator) << "Patro" << right << setw(10) << setfill(separator)  << "Cislo pokoje" <<  right << setw(10) << setfill(separator) << "Kapacita " << right << setw(10) << setfill(separator) << "Cena" << endl;
+                         ifstream rezervace_hled("rezervace_data.csv", ios::in);
+                         if(rezervace_hled.fail()) {
+                             cout << "soubor 'rezervace_data.csv' nelze otevrit" << endl;
+                             exit(1);
+                         }
+                         
+                         cout << right << setw(5) << setfill(separator) << "ID" << right << setw(6) << setfill(separator) << "Patro" << right << setw(14) << setfill(separator)  << "Cislo pokoje" <<  right << setw(11) << setfill(separator) << "Kapacita " << right << setw(12) << setfill(separator) << "Cena" << endl;
                                  while(getline(pokoje_hled, radek)) {
                                         int id;
                                         int patro;
                                         int cislo_pokoje;
                                         int kapacita;
                                         int cena;
-                                         istringstream iss2(radek);
+                                     
+                                        istringstream iss2(radek);
                                         if (!(iss2 >> id >> patro >> cislo_pokoje >> kapacita >> cena)) { break; }
                                         if(cena <= hledej_cena and kapacita >= hledej_kapacita) {
-        //nactení rezervací
-                                             ifstream rezervace_dostupnost ("rezervace_data.csv", ios::in);
-                                             if(rezervace_dostupnost.fail()) {
-                                                 cout << "soubor 'rezervace_data.csv' nelze otevrít" << endl;
-                                                 exit(1);
-                                             }
-                                             while(getline(rezervace_dostupnost, line)) {
-                                                 int por_id, mm, dd, rrrr;
-                                                 istringstream iss(line);
-                                                 if(!(iss >> id >> dd >> mm >> rrrr)) {break;}
-                                                 if(!(id == por_id and dd == datum_d and mm == datum_m and rrrr == datum_r)) {   
-                                                     cout << right << setw(5) << setfill(separator) << id << right << setw(6) << setfill(separator) << patro << right << setw(10) << setfill(separator)  << cislo_pokoje <<  right << setw(10) << setfill(separator) << kapacita << right << setw(10) << setfill(separator) << cena << "K�" << endl;
-                                                     iss.clear();
-                                                 }
-                                                 
-                                             }
-                                        rezervace_dostupnost.close(); }
+                                                cout << right << setw(5) << setfill(separator) << id << right << setw(6) << setfill(separator) << patro << right << setw(15) << setfill(separator)  << cislo_pokoje <<  right << setw(15) << setfill(separator) << kapacita << right << setw(15) << setfill(separator) << cena << "Kč" << endl;
                                         }
-                         
-                                 pokoje_hled.close();
+                                        
+                                 }
+                                rezervace_hled.close();
+                                pokoje_hled.close();
+                                 
                               cout << "------------------------------------------" << endl;
                               cout << "pokud chceš hledat znovu napiš v " << endl;
                               cout << "pro pokračovaní v rezervaci r " << endl;
                               cout << "pro export rezervací dané mistnosti e " << endl;
+                              cout << "pro konec napiš k " << endl;
                               cin >> flow;
                               if(overeni_flow(flow) == 'v') {
                                   goto hledej;
                               }
+                              if(overeni_flow(flow) == 'k') {
+                                  exit(0);
+                              }
         }
  
-    //tady končí muj problém
+  
     
     // rezervace
     
     
     
     if(overeni_flow(flow) == 'r') {	 
-        
+      rezerv:  
          int rez_id;
          int datum_d;
          int datum_m;
@@ -179,7 +177,7 @@ read_stream.close();
          string line;
          int id, patro, cislo_pokoje, cena, kapacita;
          
-         rezerv:
+         
 			 cout << "-------REZERVACE-------" <<  endl;
 
 			 cout << "Zadejte ID mistnosti: ";
@@ -216,7 +214,7 @@ read_stream.close();
                              int id, dd, mm, rrrr;
                              if(!(iss3 >> id >> dd >> mm >> rrrr)){break;}
                              if(id == rez_id and dd == datum_d and mm == datum_m and rrrr == datum_r){
-                                 cout << "tento pokoje je na toto datum obsazen zvolte jiné datum" << endl;
+                                 cout << "tento pokoje je na toto datum obsazen zvolte jiné datum nebo pokoj" << endl;
                                  iss3.clear();
                                  goto rezerv;
                              }
@@ -249,7 +247,7 @@ read_stream.close();
                             cout << "Do souboru nelze 'rezervace_data.csv' zapsat" <<endl;
                             exit(1);
                         }
-			rezervace_data << rez_id << " " << datum_d << " " << datum_m << " " << datum_r << "\r\n";
+			rezervace_data << rez_id << " " << datum_d << " " << datum_m << " " << datum_r << endl;
 			rezervace_data.close();
 			cout << "Rezervace vytvořena" << endl;
                         iss.clear();
@@ -259,6 +257,7 @@ read_stream.close();
                               cout << "pokud chceš rezervovat znovu napiš r " << endl;
                               cout << "pokud chceš hledat znovu napiš v " << endl;
                               cout << "pro export rezervací dané mistnosti e " << endl;
+                              cout << "pro konec napiš k " << endl;
                               cin >> flow;
                               if(overeni_flow(flow) == 'r') {
                                   goto rezerv;
@@ -266,16 +265,20 @@ read_stream.close();
                               if(overeni_flow(flow) == 'v') {
                                   goto hledej;
                               }
+                              if(overeni_flow(flow) == 'k') {
+                                  exit(0);
+                              }
     }
     
     
     //export do HTML
     
     if(overeni_flow(flow) == 'e') {
+        expo: 
+        
         string cesta;
         int get_id;
         string line;
-        
         cout << "----------------------------" << endl;
         cout << "Export rezervací do HTML" << endl;
         cout << "zadejte umístění souboru(př. \"c:/cesta/nazev.html\"  ): ";
@@ -314,6 +317,25 @@ read_stream.close();
         html << "</body></html>" << endl;
         html.close();
         
+                              cout << "-------------------------------------" << endl;
+                              cout << "pokud chceš rezervovat znovu napiš r " << endl;
+                              cout << "pokud chceš hledat znovu napiš v " << endl;
+                              cout << "pokud chceš exportovat znovu napiš e " << endl;
+                              cout << "pokud chceš ukončit program napiš k " << endl; 
+                              cin >> flow;
+                              if(overeni_flow(flow) == 'r') {
+                                  goto rezerv;
+                              }
+                              if(overeni_flow(flow) == 'v') {
+                                  goto hledej;
+                              }
+                              if(overeni_flow(flow) == 'e') {
+                                  goto expo;
+                              }
+                              if(overeni_flow(flow) == 'k') {
+                                  exit(1);
+                              }
+        
     }
     
 	return 0;
@@ -321,7 +343,7 @@ read_stream.close();
 
 /// fce
 char overeni_flow(char flow) {
-    if(flow != 'v' and flow != 'r' and flow != 'e') {
+    if(flow != 'v' and flow != 'r' and flow != 'e' and flow != 'k') {
         cout << "Zadali jste Špatně" << endl;
         cin >> flow;
         return(flow);
@@ -329,7 +351,8 @@ char overeni_flow(char flow) {
     else return(flow);
 };
 bool overeni_den_proti_mesici(int mesic, int den) {
-        if(overeni_mesic(mesic)) {
+   if((!cin.fail())) {
+    if(overeni_mesic(mesic)) {
             if(den <= 31 and den >= 1) {
                 return(true);     
             }
@@ -338,44 +361,60 @@ bool overeni_den_proti_mesici(int mesic, int den) {
             } 
             if((den > 28) and (mesic == 2)) {
                 return(true);
-            }
-        
+            }}
+        cin.clear();
+        cin.ignore();
         return(false);
         }
 };
 
 bool overeni_rok(int rok) {
+    if(!(cin.fail())) {
     if(rok <= 2200 and rok >= 1800) {
         return(true);
-    }
+    }}
+    cin.clear();
+    cin.ignore();
     return(false);
 };
 
 bool overeni_mesic(int mesic) {
+    if(!(cin.fail())) {
     if(mesic <= 12 and mesic >= 1) {
         return(true);
-        }
+    }}
+    cin.clear();
+    cin.ignore();
     return(false);
 };
 
 bool overeni_kapacita(int kapacita) {
+    if(!(cin.fail())) {
     if(kapacita <= 100 and kapacita >= 1){
         return(true);
-    }  
+    }}
+    cin.clear();
+    cin.ignore();
     return(false);
 };
 
 bool overeni_cena(int cena) {
+    if(!(cin.fail())) {
     if(cena <= 30000000 and cena >= 1) {
         return(true);
-    }
+    }}
+    cin.clear();
+    cin.ignore();
     return(false);
 };
 
 bool overeni_id(int id) {
+    if(!(cin.fail())) {
     if(id <= 100 and id >= 1){
         return(true);
-    }
+    }}
+    cin.clear();
+    cin.ignore();
     return(false);
 };
 
